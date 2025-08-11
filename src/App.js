@@ -2,7 +2,7 @@ import './App.css';
 import Header from './component/Header';
 import TodoEditor from './component/TodoEditor';
 import TodoList from './component/TodoList';
-import { useReducer, useRef, useCallback } from 'react';
+import React, { useMemo, useReducer, useRef, useCallback } from 'react';
 
 const mockTodo = [
   { id: 0, isDone: false, content: 'React 공부하기', createDate: new Date().getTime() },
@@ -26,6 +26,9 @@ function reducer(state, action) {
   }
   
 }
+
+export const TodoStateContext = React.createContext();
+export const TodoDispatchContext = React.createContext();
 
 function App() {
   // const [todo, setTodo] = useState(mockTodo);
@@ -58,11 +61,19 @@ function App() {
     });
   }, []);
 
+  const memoizedDispatches = useMemo(() => {
+    return { onCreate, onUpdate, onDelete };
+  }, []);
+
   return (
     <div className="App">
       <Header />
-      <TodoEditor onCreate={onCreate} />
-      <TodoList todo={todo} onUpdate={onUpdate} onDelete={onDelete}/>
+      <TodoStateContext.Provider value={{ todo }}>
+        <TodoDispatchContext.Provider value={memoizedDispatches}>
+        <TodoEditor />
+        <TodoList />
+        </TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
     </div>
   );
 }
